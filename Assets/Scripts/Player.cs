@@ -31,8 +31,12 @@ public class Player : MonoBehaviour
         Vector2 playerVelocity = new Vector2(controlThrow * runSpeed, myRigidBody.velocity.y);
         myRigidBody.velocity = playerVelocity;
 
-        bool playerHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
-        myAnimator.SetBool("Running", playerHorizontalSpeed);
+        // bool playerHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
+        // myAnimator.SetBool("Running", playerHorizontalSpeed);
+        
+        myAnimator.SetBool("Running Right", myRigidBody.velocity.x > 0);
+        myAnimator.SetBool("Running Left", myRigidBody.velocity.x < 0);
+        myAnimator.SetBool("Idleing", myRigidBody.velocity.x == 0);
     }
 
     private void Jump()
