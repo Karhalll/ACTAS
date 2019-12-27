@@ -6,11 +6,13 @@ public class Player : MonoBehaviour
     [SerializeField] float jumpSpeed = 10f;
 
     Rigidbody2D myRigidBody = null;
+    Collider2D myCollider = null;
     Animator myAnimator = null;
 
     private void Awake() 
     {
         myRigidBody =  GetComponent<Rigidbody2D>();
+        myCollider = GetComponent<Collider2D>();
         myAnimator = GetComponent<Animator>();
     }
 
@@ -22,7 +24,18 @@ public class Player : MonoBehaviour
     void Update()
     {
         Run();
-        Jump();
+        HandleJump();
+    }
+
+    private void OnCollisionStay2D(Collision2D other) 
+    {
+        if (other.gameObject.layer == 8)
+        myAnimator.SetBool("Jumping", false);
+    }
+
+    private void OnCollisionExit2D(Collision2D other) 
+    {
+        myAnimator.SetBool("Jumping", true);
     }
 
     private void Run()
@@ -31,19 +44,26 @@ public class Player : MonoBehaviour
         Vector2 playerVelocity = new Vector2(controlThrow * runSpeed, myRigidBody.velocity.y);
         myRigidBody.velocity = playerVelocity;
 
-        // bool playerHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
-        // myAnimator.SetBool("Running", playerHorizontalSpeed);
-        
-        myAnimator.SetBool("Running Right", myRigidBody.velocity.x > 0);
-        myAnimator.SetBool("Running Left", myRigidBody.velocity.x < 0);
-        myAnimator.SetBool("Idleing", myRigidBody.velocity.x == 0);
+        if (myCollider.IsTouchingLayers(LayerMask.GetMask("Ground"))) 
+        { 
+            myAnimator.SetBool("Running Right", myRigidBody.velocity.x > 0);
+            myAnimator.SetBool("Running Left", myRigidBody.velocity.x < 0);
+            myAnimator.SetBool("Idleing", myRigidBody.velocity.x == 0); 
+        }
     }
 
-    private void Jump()
+    private void HandleJump()
     {
-        //if (!myFeet.IsTouchingLayers(LayerMask.GetMask("Ground"))) { return; }
+        if (Input.GetButtonDown("Jump") && myCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
+        {
+            myAnimator.SetTrigger("Jump");
+        }
+    }
 
-        if (Input.GetButtonDown("Jump"))
+    //Unity Animation Event
+    public void Jump()
+    {
+        if (myCollider.IsTouchingLayers(LayerMask.GetMask("Ground")))
         {
             Vector2 jumpVelocityToAdd = new Vector2(0f, jumpSpeed);
             myRigidBody.velocity += jumpVelocityToAdd;
