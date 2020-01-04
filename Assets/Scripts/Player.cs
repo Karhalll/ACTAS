@@ -9,6 +9,8 @@ public class Player : MonoBehaviour
     Collider2D myCollider = null;
     Animator myAnimator = null;
 
+    bool isFliped = false;
+
     private void Awake() 
     {
         myRigidBody =  GetComponent<Rigidbody2D>();
@@ -25,6 +27,7 @@ public class Player : MonoBehaviour
     {
         Run();
         HandleJump();
+        FlipSprite();
     }
 
     private void OnCollisionStay2D(Collision2D other) 
@@ -44,10 +47,11 @@ public class Player : MonoBehaviour
         Vector2 playerVelocity = new Vector2(controlThrow * runSpeed, myRigidBody.velocity.y);
         myRigidBody.velocity = playerVelocity;
 
+        bool playerHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
+
         if (myCollider.IsTouchingLayers(LayerMask.GetMask("Ground"))) 
         { 
-            myAnimator.SetBool("Running Right", myRigidBody.velocity.x > 0);
-            myAnimator.SetBool("Running Left", myRigidBody.velocity.x < 0);
+            myAnimator.SetBool("Running", playerHorizontalSpeed);
             myAnimator.SetBool("Idleing", myRigidBody.velocity.x == 0); 
         }
     }
@@ -59,6 +63,17 @@ public class Player : MonoBehaviour
             myAnimator.SetTrigger("Jump");
         }
     }
+
+    private void FlipSprite()
+        {
+            bool playerHasHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
+            if (playerHasHorizontalSpeed)
+            {
+                Debug.Log("Flip");
+                transform.localScale = new Vector2(Mathf.Sign(myRigidBody.velocity.x), 1f);
+                Debug.Log(Mathf.Sign(myRigidBody.velocity.x));
+            }
+        }
 
     //Unity Animation Event
     public void Jump()
