@@ -4,12 +4,13 @@ public class Player : MonoBehaviour
 {
     [SerializeField] float runSpeed = 15f;
     [SerializeField] float jumpSpeed = 10f;
+    [SerializeField] float AFKDelay = 5f;
 
     Rigidbody2D myRigidBody = null;
     Collider2D myCollider = null;
     Animator myAnimator = null;
 
-    bool isFliped = false;
+    float TimeSinceLastAction = 0f;
 
     private void Awake() 
     {
@@ -28,6 +29,10 @@ public class Player : MonoBehaviour
         Run();
         HandleJump();
         FlipSprite();
+
+        IsAFK();
+
+        UpdateTimers();
     }
 
     private void OnCollisionStay2D(Collision2D other) 
@@ -65,15 +70,29 @@ public class Player : MonoBehaviour
     }
 
     private void FlipSprite()
+    {
+        bool playerHasHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
+        if (playerHasHorizontalSpeed)
         {
-            bool playerHasHorizontalSpeed = Mathf.Abs(myRigidBody.velocity.x) > Mathf.Epsilon;
-            if (playerHasHorizontalSpeed)
-            {
-                Debug.Log("Flip");
-                transform.localScale = new Vector2(Mathf.Sign(myRigidBody.velocity.x), 1f);
-                Debug.Log(Mathf.Sign(myRigidBody.velocity.x));
-            }
+            Debug.Log("Flip");
+            transform.localScale = new Vector2(Mathf.Sign(myRigidBody.velocity.x), 1f);
+            Debug.Log(Mathf.Sign(myRigidBody.velocity.x));
         }
+    }
+
+    private void IsAFK()
+    {
+        if(Input.anyKey)
+        {
+            TimeSinceLastAction = 0f;
+        }
+
+        if(TimeSinceLastAction >= AFKDelay)
+        {
+            myAnimator.SetTrigger("AFK");
+            TimeSinceLastAction = 0f;
+        }
+    }
 
     //Unity Animation Event
     public void Jump()
@@ -83,5 +102,10 @@ public class Player : MonoBehaviour
             Vector2 jumpVelocityToAdd = new Vector2(0f, jumpSpeed);
             myRigidBody.velocity += jumpVelocityToAdd;
         }
+    }
+
+    private void UpdateTimers()
+    {
+        TimeSinceLastAction += Time.deltaTime;
     }
 }

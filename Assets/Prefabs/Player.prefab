@@ -166,3 +166,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   runSpeed: 6
   jumpSpeed: 8
+  AFKDelay: 60
